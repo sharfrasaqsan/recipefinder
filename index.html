@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipe Finder</title>
+    <!-- Add Bulma CSS CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css"
+    />
+    <style>
+      #recipeIngredients {
+        margin-bottom: 4rem;
+      }
+
+      #recipeIngredients ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      #recipeIngredients li {
+        margin-bottom: 5px;
+      }
+
+      .modal-card-body h4 {
+        margin-bottom: 1rem;
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      /* Style for the footer */
+      footer {
+        background-color: #333;
+        color: #fff;
+        padding: 1rem 0;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <section class="hero is-primary">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title">Recipe Finder</h1>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="columns">
+          <div class="column is-half">
+            <div class="field">
+              <label class="label">Enter Ingredients (comma-separated):</label>
+              <div class="control">
+                <input
+                  class="input"
+                  type="text"
+                  id="ingredientInput"
+                  placeholder="e.g., chicken, pasta, tomato"
+                />
+              </div>
+            </div>
+            <div class="field">
+              <div class="control">
+                <button class="button is-primary" id="searchButton">
+                  Search Recipes
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="column is-half">
+            <h2 class="title is-4">Matching Recipes:</h2>
+            <ul id="recipeList" class="menu"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recipe Details Modal -->
+    <div class="modal" id="recipeModal">
+      <div class="modal-background"></div>
+      <div class="modal-card">
+        <header class="modal-card-head">
+          <p class="modal-card-title">Recipe Details</p>
+          <button
+            class="delete"
+            aria-label="close"
+            onclick="closeModal()"
+          ></button>
+        </header>
+        <section class="modal-card-body" id="recipeDetails">
+          <!-- Recipe details will be displayed here -->
+          <h4>Ingredients:</h4>
+          <div id="recipeIngredients">
+            <ul></ul>
+          </div>
+          <h4>Instructions:</h4>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam
+            tincidunt, tortor a euismod pretium, urna felis bibendum mauris. ...
+          </p>
+        </section>
+      </div>
+    </div>
+
+    <!-- About Section -->
+    <section class="section">
+      <div class="container">
+        <h2 class="title is-4">About Recipe Finder</h2>
+        <p>
+          Recipe Finder is a versatile and user-friendly web application
+          designed to cater to your culinary desires. With Recipe Finder,
+          embarking on a gastronomic adventure is as easy as typing in the
+          ingredients you have at hand and clicking the "Search Recipes" button.
+          This intuitive platform opens the door to a world of culinary
+          possibilities.
+          <br /><br />
+          Our mission is to simplify your cooking experience by offering a vast
+          database of delectable recipes tailored to your ingredients. Whether
+          you're a seasoned chef looking to innovate or a beginner seeking
+          inspiration, Recipe Finder has you covered.
+          <br /><br />
+          Imagine effortlessly exploring a treasure trove of diverse cuisines,
+          from the comforting warmth of homemade soups to the exotic flavors of
+          international dishes. Recipe Finder's extensive library ensures
+          there's something for every palate, occasion, and dietary preference.
+          <br /><br />
+          Our user-friendly interface and powerful search engine make
+          discovering recipes a breeze. Say goodbye to the hassle of searching
+          through countless cookbooks or websites—Recipe Finder brings the
+          culinary world to your fingertips.
+          <br /><br />
+          Unlock your culinary creativity, savor new tastes, and elevate your
+          cooking skills with Recipe Finder. Join us on this delectable journey
+          and redefine your kitchen experience, one dish at a time. Happy
+          cooking!
+        </p>
+      </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer>
+      <div class="container">
+        <p>&copy; 2023 Recipe Finder. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <!-- Add Bulma JS CDN for Navbar functionality -->
+    <script
+      defer
+      src="https://use.fontawesome.com/releases/v5.15.3/js/all.js"
+    ></script>
+
+    <script>
+      // Function to display recipe details in the modal
+      function displayRecipeDetails(recipe) {
+        const modalTitle = document.querySelector(
+          "#recipeModal .modal-card-title"
+        );
+        const modalIngredients = document.getElementById("recipeIngredients");
+
+        modalTitle.textContent = recipe.label;
+        modalIngredients.innerHTML = `<ul>${recipe.ingredientLines
+          .map((ingredient) => `<li>${ingredient}</li>`)
+          .join("")}</ul>`;
+
+        // Show the modal
+        const modal = document.querySelector("#recipeModal");
+        modal.classList.add("is-active");
+      }
+
+      // Function to search for recipes based on ingredients
+      function searchRecipes() {
+        const ingredientInput =
+          document.getElementById("ingredientInput").value;
+        const recipeList = document.getElementById("recipeList");
+        recipeList.innerHTML = ""; // Clear previous results
+
+        // Replace 'YOUR_APP_ID' and 'YOUR_APP_KEY' with your Edamam API credentials
+        const appId = "dc2503ce";
+        const appKey = "5a77dcb81ad2768b1d647e7df3bcac7c";
+        const apiUrl = `https://api.edamam.com/search?q=${ingredientInput}&app_id=${appId}&app_key=${appKey}`;
+
+        // Make an API request
+        fetch(apiUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            data.hits.forEach((hit) => {
+              const recipe = hit.recipe;
+              const listItem = document.createElement("li");
+              listItem.textContent = recipe.label;
+              listItem.classList.add("menu-item");
+              listItem.style.cursor = "pointer"; // Change cursor to indicate clickability
+              // Use a function to handle the click event on recipe list items
+              listItem.addEventListener("click", () =>
+                displayRecipeDetails(recipe)
+              );
+              recipeList.appendChild(listItem);
+            });
+          })
+          .catch((error) => console.error(error));
+      }
+
+      // Add click event listener to the search button
+      document
+        .getElementById("searchButton")
+        .addEventListener("click", searchRecipes);
+
+      // Function to close the modal
+      function closeModal() {
+        const modal = document.querySelector("#recipeModal");
+        modal.classList.remove("is-active");
+      }
+    </script>
+  </body>
+</html>
